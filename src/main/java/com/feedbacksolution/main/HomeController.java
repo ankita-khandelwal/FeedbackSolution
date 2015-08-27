@@ -48,7 +48,6 @@ public class HomeController {
 
     }
 
-
     @RequestMapping(value = "/update", method = RequestMethod.PUT)
     @ResponseStatus(HttpStatus.CREATED)
     public void create(@RequestBody SampleObject obj) {
