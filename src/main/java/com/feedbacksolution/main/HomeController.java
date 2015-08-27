@@ -31,9 +31,12 @@ public class HomeController {
     }
 
     @RequestMapping(value = "/get/{_id}", method = RequestMethod.GET)
-    public @ResponseBody SampleObject get(@PathVariable Long _id) {
+    public @ResponseBody String get(@PathVariable Long _id) {                   // change @ResponseBody to SampleObject since that will be used by the frontend.
         logger.debug("in get method");
-        return service.getObjById(_id);
+
+        SampleObject object = service.getObjById(_id);
+
+        return object.toString();
     }
 
     @RequestMapping(value = "/create", method = RequestMethod.POST)

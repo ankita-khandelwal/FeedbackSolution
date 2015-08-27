@@ -36,4 +36,12 @@ public class SampleObject {
     public void setTestColumn(String testColumn) {
         this.testColumn = testColumn;
     }
+
+    @Override
+    public String toString() {
+        return "SampleObject{" +
+                "id=" + id +
+                ", testColumn='" + testColumn + '\'' +
+                '}';
+    }
 }
