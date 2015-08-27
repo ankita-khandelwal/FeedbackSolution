@@ -12,5 +12,4 @@ import org.springframework.stereotype.Repository;
  *         8/25/15.
  */
 
-@Repository
 public interface RepositoryInterface extends CrudRepository<SampleObject, Long>{}

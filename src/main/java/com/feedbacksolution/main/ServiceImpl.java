@@ -3,6 +3,7 @@ package com.feedbacksolution.main;
 import com.feedbacksolution.main.persistence.RepositoryInterface;
 import com.feedbacksolution.main.persistence.SampleObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * Description:
@@ -10,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author Created by deepmistry
  *         8/25/15.
  */
+
+@Service
 public class ServiceImpl implements ServiceInterface {
 
     @Autowired
@@ -28,5 +31,10 @@ public class ServiceImpl implements ServiceInterface {
     @Override
     public Iterable<SampleObject> getAll() {
         return repository.findAll();
+    }
+
+    @Override
+    public SampleObject getObjById(Long id) {
+        return repository.findOne(id);
     }
 }
