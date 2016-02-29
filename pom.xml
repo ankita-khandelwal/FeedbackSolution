@@ -3,7 +3,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.feedbacksolution</groupId>
-	<artifactId>FeedbackSolution</artifactId>
+	<artifactId>main</artifactId>
 	<name>FeedbackSolution</name>
 	<packaging>war</packaging>
 	<version>1.0.0-BUILD-SNAPSHOT</version>
@@ -47,7 +47,7 @@
 		</dependency>
         <dependency>
             <groupId>org.springframework.data</groupId>
-            <artifactId>spring-data-mongodb-parent</artifactId>
+            <artifactId>spring-data-mongodb</artifactId>
             <version>${org.springframework-data-version}</version>
         </dependency>
 
