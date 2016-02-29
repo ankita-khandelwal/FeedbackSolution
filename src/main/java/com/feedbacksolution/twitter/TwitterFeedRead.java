@@ -1,12 +1,15 @@
 package com.feedbacksolution.twitter;
 
+import com.google.common.collect.Lists;
 import com.twitter.hbc.ClientBuilder;
+import com.twitter.hbc.core.Client;
 import com.twitter.hbc.core.Constants;
-import com.twitter.hbc.core.endpoint.StatusesSampleEndpoint;
+import com.twitter.hbc.core.endpoint.StatusesFilterEndpoint;
 import com.twitter.hbc.core.processor.StringDelimitedProcessor;
-import com.twitter.hbc.httpclient.BasicClient;
 import com.twitter.hbc.httpclient.auth.Authentication;
 import com.twitter.hbc.httpclient.auth.OAuth1;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -20,21 +23,21 @@ import java.util.concurrent.TimeUnit;
  */
 public class TwitterFeedRead {
 
+    private static Logger logger = LoggerFactory.getLogger(TwitterFeedRead.class);
+
     public static void run(String consumerKey, String consumerSecret, String token, String secret) throws InterruptedException {
         // Create an appropriately sized blocking queue
         BlockingQueue<String> queue = new LinkedBlockingQueue<String>(10000);
-
-        // Define our endpoint: By default, delimited=length is set (we need this for our processor)
-        // and stall warnings are on.
-        StatusesSampleEndpoint endpoint = new StatusesSampleEndpoint();
-        endpoint.stallWarnings(false);
+        StatusesFilterEndpoint endpoint = new StatusesFilterEndpoint();
+        // add some track terms
+        endpoint.trackTerms(Lists.newArrayList("Coca Cola"));
+        //endpoint.followings(Lists.newArrayList(52309424L));
 
         Authentication auth = new OAuth1(consumerKey, consumerSecret, token, secret);
-        //Authentication auth = new com.twitter.hbc.httpclient.auth.BasicAuth(username, password);
+        // Authentication auth = new BasicAuth(username, password);
 
         // Create a new BasicClient. By default gzip is enabled.
-        BasicClient client = new ClientBuilder()
-                .name("sampleExampleClient")
+        Client client = new ClientBuilder()
                 .hosts(Constants.STREAM_HOST)
                 .endpoint(endpoint)
                 .authentication(auth)
@@ -47,15 +50,15 @@ public class TwitterFeedRead {
         // Do whatever needs to be done with messages
         for (int msgRead = 0; msgRead < 1000; msgRead++) {
             if (client.isDone()) {
-                System.out.println("Client connection closed unexpectedly: " + client.getExitEvent().getMessage());
+                System.out.println("Client connection closed unexpectedly");
                 break;
             }
 
             String msg = queue.poll(5, TimeUnit.SECONDS);
             if (msg == null) {
-                System.out.println("Did not receive a message in 5 seconds");
+                logger.info("Did not receive a message in 5 seconds");
             } else {
-                System.out.println(msg);
+                logger.info(msg);
             }
         }
 
