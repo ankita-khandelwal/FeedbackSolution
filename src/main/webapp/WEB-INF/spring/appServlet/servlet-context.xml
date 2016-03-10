@@ -19,5 +19,9 @@
 		<beans:property name="prefix" value="/WEB-INF/views/" />
 		<beans:property name="suffix" value=".jsp" />
 	</beans:bean>
-	
+
+	<!-- Property placeholder configurer : Replaces the property file reference with actual terms -->
+    <beans:bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <beans:property name="location" value="feed.properties"/>
+    </beans:bean>
 </beans:beans>

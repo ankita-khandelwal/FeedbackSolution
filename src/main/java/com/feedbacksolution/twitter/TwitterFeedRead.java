@@ -1,5 +1,6 @@
 package com.feedbacksolution.twitter;
 
+import com.feedbacksolution.main.TwitterAppConstants;
 import com.google.common.collect.Lists;
 import com.twitter.hbc.ClientBuilder;
 import com.twitter.hbc.core.Client;
@@ -10,7 +11,11 @@ import com.twitter.hbc.httpclient.auth.Authentication;
 import com.twitter.hbc.httpclient.auth.OAuth1;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -21,58 +26,46 @@ import java.util.concurrent.TimeUnit;
  * @author Created by deepmistry
  *         2/21/16.
  */
+@Component
 public class TwitterFeedRead {
 
-    private static Logger logger = LoggerFactory.getLogger(TwitterFeedRead.class);
+    private Client client;
+    BlockingQueue<String> queue;
 
-    public static void run(String consumerKey, String consumerSecret, String token, String secret) throws InterruptedException {
-        // Create an appropriately sized blocking queue
-        BlockingQueue<String> queue = new LinkedBlockingQueue<String>(10000);
+    @Autowired
+    TwitterFeedRead(@Value("${feed.trackTerm}") String trackTerm){
+        // Need 100 ? What if more than 100 requests per second.
+        queue = new LinkedBlockingQueue<String>(100);
         StatusesFilterEndpoint endpoint = new StatusesFilterEndpoint();
-        // add some track terms
-        endpoint.trackTerms(Lists.newArrayList("Coca Cola"));
-        //endpoint.followings(Lists.newArrayList(52309424L));
-
-        Authentication auth = new OAuth1(consumerKey, consumerSecret, token, secret);
-        // Authentication auth = new BasicAuth(username, password);
-
-        // Create a new BasicClient. By default gzip is enabled.
-        Client client = new ClientBuilder()
+        endpoint.trackTerms(Lists.newArrayList(trackTerm));
+        Authentication auth = new OAuth1(TwitterAppConstants.CONSUMER_KEY, TwitterAppConstants.CONSUMER_SECRET, TwitterAppConstants.ACCESS_TOKEN, TwitterAppConstants.ACCESS_TOKEN_SECRET);
+        client = new ClientBuilder()
                 .hosts(Constants.STREAM_HOST)
                 .endpoint(endpoint)
                 .authentication(auth)
                 .processor(new StringDelimitedProcessor(queue))
                 .build();
 
-        // Establish a connection
         client.connect();
+    }
 
-        // Do whatever needs to be done with messages
-        for (int msgRead = 0; msgRead < 1000; msgRead++) {
-            if (client.isDone()) {
-                System.out.println("Client connection closed unexpectedly");
-                break;
-            }
+    private static Logger logger = LoggerFactory.getLogger(TwitterFeedRead.class);
 
-            String msg = queue.poll(5, TimeUnit.SECONDS);
-            if (msg == null) {
-                logger.info("Did not receive a message in 5 seconds");
-            } else {
-                logger.info(msg);
-            }
+    public String getSingleTweet() throws InterruptedException {
+
+        if (client.isDone()) {
+            logger.warn("Client connection closed unexpectedly");
+            return null;
         }
 
-        client.stop();
-
-        // Print some stats
-        System.out.printf("The client read %d messages!\n", client.getStatsTracker().getNumMessages());
+        String msg = queue.poll(5, TimeUnit.SECONDS);
+        if (msg == null) {
+            System.out.println("Did not receive a message in 5 seconds");
+        }
+        return msg;
     }
 
     public static void main(String[] args) {
-        try {
-            TwitterFeedRead.run(args[0], args[1], args[2], args[3]);
-        } catch (InterruptedException e) {
-            System.out.println(e);
-        }
+        //TwitterFeedRead.run(args[0], args[1], args[2], args[3]);
     }
 }
