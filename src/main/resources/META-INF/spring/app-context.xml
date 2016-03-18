@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mongo="http://www.springframework.org/schema/data/mongo"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans			http://www.springframework.org/schema/beans/spring-beans.xsd
+                        http://www.springframework.org/schema/context		http://www.springframework.org/schema/context/spring-context-3.0.xsd
+                        http://www.springframework.org/schema/data/mongo    http://www.springframework.org/schema/data/mongo/spring-mongo-1.0.xsd
+                        http://www.springframework.org/schema/util          http://www.springframework.org/schema/util/spring-util-3.0.xsd">
+
+
+    <context:component-scan base-package="com.feedbacksolution" />
+
+    <!-- Host and port for the mongod instance (default values of MongoDB here) -->
+    <mongo:mongo host="localhost" port="27017" />
+
+    <mongo:db-factory dbname="twitterFeedRead" mongo-ref="mongo" />
+
+    <!-- MongoTemplate must have a mongod instance as a const arg and the database
+        name. ( The database need not exist ) The write Concern property takes into
+        account many MongoDB exceptions such as duplicate inserts etc which mite
+        not persist to the database possible values are LOG, EXCEPTION, NONE and
+        NORMAL
+        This bean is never used. It has been declared here to provide easy config options to
+        any curious developers who want to try out the MongoTemplate -->
+    <bean id="mongoTemplate" class="org.springframework.data.mongodb.core.MongoTemplate">
+
+        <constructor-arg name="mongoDbFactory" ref="mongoDbFactory" />
+        <constructor-arg name="mongoConverter" ref="mappingConverter" />
+        <property name="writeResultChecking" value="EXCEPTION" />
+        <property name="writeConcern">
+            <util:constant static-field="com.mongodb.WriteConcern.SAFE" />
+        </property>
+
+    </bean>
+
+    <!-- by default look for a Mongo object named 'mongo' - default name used
+        for the converter is 'mappingConverter' -->
+    <mongo:mapping-converter base-package="com.feedbacksolution" />
+
+    <mongo:repositories base-package="com.feedbacksolution.repository" />
+
+</beans>
